@@ -30,8 +30,8 @@ extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
     pool:
-      name: Azure-Pipelines-1ESPT-ExDShared
-      image: windows-2022
+      name: NetCore1ESPool-Svc-Internal
+      image: 1es-windows-2022-pt
       os: windows
     customBuildTags:
     - ES365AIMigrationTooling
@@ -130,6 +130,7 @@ extends:
               ${{ if eq(variables['System.TeamProject'], 'internal') }}:
                 name: NetCore1ESPool-Svc-Internal
                 demands: ImageOverride -equals 1es-ubuntu-2004
+              os: linux
             strategy:
               matrix:
                 ${{ if in(variables['Build.Reason'], 'PullRequest') }}:
@@ -156,7 +157,9 @@ extends:
           - job: MacOS
             displayName: MacOS
             pool:
-              vmImage: macOS-latest
+              name: Azure Pipelines
+              image: macOS-latest
+              os: macOS
             strategy:
               matrix:
                 ${{ if in(variables['Build.Reason'], 'PullRequest') }}:
