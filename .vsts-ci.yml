@@ -98,6 +98,20 @@ extends:
                   ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
                     _SignType: real
                     _BuildArgs: $(_OfficialBuildArgs)
+
+            templateContext:
+              outputs:
+              - output: pipelineArtifact
+                displayName: Upload package artifacts
+                condition: and(eq(variables['system.pullrequest.isfork'], false), eq(variables['_BuildConfig'], 'Release'))
+                targetPath: artifacts/packages/
+                artifactName: artifacts
+              - output: pipelineArtifact
+                displayName: Publish Artifact Symbols
+                condition: and(eq(variables['system.pullrequest.isfork'], false), eq(variables['_BuildConfig'], 'Release'))
+                targetPath: '$(Build.SourcesDirectory)\artifacts\SymStore\$(_BuildConfig)'
+                artifactName: 'NativeSymbols'
+
             steps:
             - checkout: self
               clean: true
@@ -106,20 +120,6 @@ extends:
                 -prepareMachine
                 $(_BuildArgs)
               displayName: Build and Publish
-            - task: PublishBuildArtifacts@1
-              displayName: Upload package artifacts
-              condition: and(eq(variables['system.pullrequest.isfork'], false), eq(variables['_BuildConfig'], 'Release'))
-              inputs:
-                pathtoPublish: artifacts/packages/
-                artifactName: artifacts
-                artifactType: Container
-                parallel: true
-            - task: PublishBuildArtifacts@1
-              displayName: Publish Artifact Symbols
-              condition: and(eq(variables['system.pullrequest.isfork'], false), eq(variables['_BuildConfig'], 'Release'))
-              inputs:
-                PathtoPublish: '$(Build.SourcesDirectory)\artifacts\SymStore\$(_BuildConfig)'
-                ArtifactName: 'NativeSymbols'
 
           - job: Ubuntu
             displayName: Ubuntu
